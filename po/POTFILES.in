@@ -1,0 +1,13 @@
+src/app.vala
+src/window.vala
+src/device_view.vala
+src/pairing_view.vala
+src/messages_view.vala
+src/notifications_view.vala
+src/received_view.vala
+src/send_dialogs.vala
+src/drop_zone.vala
+src/format.vala
+src/transfer_store.vala
+src/search.vala
+data/dev.sinty.Nearby.desktop

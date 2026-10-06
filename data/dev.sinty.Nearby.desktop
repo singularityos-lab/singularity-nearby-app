@@ -1,0 +1,29 @@
+[Desktop Entry]
+Name=Nearby
+Comment=Your phone and nearby devices: files, messages and notifications
+Exec=singularity-nearby-app
+Icon=dev.sinty.Nearby
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;
+Keywords=phone;android;iphone;kde connect;gsconnect;sms;messages;send;files;pair;
+StartupWMClass=dev.sinty.Nearby
+StartupNotify=true
+X-Singularity-App=dev.sinty.Nearby
+X-Singularity-Dock-Recent=true
+Actions=send-files;pair-device;received-files;
+
+[Desktop Action send-files]
+Name=Send Files
+Icon=document-send-symbolic
+Exec=singularity-nearby-app --page send-files
+
+[Desktop Action pair-device]
+Name=Pair a Device
+Icon=list-add-symbolic
+Exec=singularity-nearby-app --page pair
+
+[Desktop Action received-files]
+Name=Received Files
+Icon=folder-download-symbolic
+Exec=singularity-nearby-app --page received
