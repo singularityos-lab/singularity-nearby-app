@@ -219,7 +219,9 @@ namespace Singularity.Apps.Nearby {
             cancel_btn.visible = requested;
             if (incoming) {
                 code_title.label = _("%s Wants to Pair").printf(d.name);
-                code_hint.label = _("Pair only if %s shows the same code.").printf(d.name);
+                code_hint.label = d.device_type == "phone" || d.device_type == "tablet"
+                    ? _("Pair only if %s shows the same code.").printf(d.name)
+                    : _("Pair only if %s shows the same code. Computers pair as equals: they can send each other files and messages. Clipboard, notifications and media control stay off until you turn them on.").printf(d.name);
             } else if (requested) {
                 code_title.label = _("Pairing with %s").printf(d.name);
                 code_hint.label = _("Accept on %s if it shows the same code.").printf(d.name);
