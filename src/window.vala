@@ -317,6 +317,36 @@ namespace Singularity.Apps.Nearby {
             highlight();
         }
 
+        private void add_device_row(NearbyDevice d) {
+            var row = new SidebarRow(d.is_computer ? "avatar-default-symbolic" : d.icon_name, d.name);
+            var box = row.get_child() as Box;
+            if (box != null) {
+                string hint_text = "";
+                if (!d.reachable) hint_text = _("Away");
+                else if (d.battery >= 0) hint_text = Format.battery(d.battery, false);
+                if (hint_text != "") {
+                    var hint = new Label(hint_text);
+                    hint.add_css_class("dim-label");
+                    hint.add_css_class("caption");
+                    box.append(hint);
+                }
+                if (d.notification_count > 0) {
+                    var badge = new Label(d.notification_count.to_string());
+                    badge.add_css_class("nearby-badge");
+                    box.append(badge);
+                }
+            }
+            if (!d.reachable) row.add_css_class("nearby-away");
+            string id = d.id;
+            row.clicked.connect(() => show_device(id));
+            DropZone.attach(row, (files) => {
+                var dev = client.find(id);
+                if (dev != null && dev.usable) send_to(id, files);
+            });
+            rows["device:" + id] = row;
+            sidebar.box.append(row);
+        }
+
         private void rebuild_sidebar(Gee.List<NearbyDevice> mine, Gee.List<NearbyDevice> others) {
             var child = sidebar.box.get_first_child();
             while (child != null) {
@@ -325,36 +355,16 @@ namespace Singularity.Apps.Nearby {
                 child = next;
             }
             rows.clear();
-            if (mine.size > 0) sidebar.box.append(new SidebarSectionLabel(_("My Devices")));
+            var devices = new Gee.ArrayList<NearbyDevice>();
+            var people = new Gee.ArrayList<NearbyDevice>();
             foreach (var d in mine) {
-                var row = new SidebarRow(d.icon_name, d.name);
-                var box = row.get_child() as Box;
-                if (box != null) {
-                    string hint_text = "";
-                    if (!d.reachable) hint_text = _("Away");
-                    else if (d.battery >= 0) hint_text = Format.battery(d.battery, false);
-                    if (hint_text != "") {
-                        var hint = new Label(hint_text);
-                        hint.add_css_class("dim-label");
-                        hint.add_css_class("caption");
-                        box.append(hint);
-                    }
-                    if (d.notification_count > 0) {
-                        var badge = new Label(d.notification_count.to_string());
-                        badge.add_css_class("nearby-badge");
-                        box.append(badge);
-                    }
-                }
-                if (!d.reachable) row.add_css_class("nearby-away");
-                string id = d.id;
-                row.clicked.connect(() => show_device(id));
-                DropZone.attach(row, (files) => {
-                    var dev = client.find(id);
-                    if (dev != null && dev.usable) send_to(id, files);
-                });
-                rows["device:" + id] = row;
-                sidebar.box.append(row);
+                if (d.is_computer) people.add(d);
+                else devices.add(d);
             }
+            if (devices.size > 0) sidebar.box.append(new SidebarSectionLabel(_("My Devices")));
+            foreach (var d in devices) add_device_row(d);
+            if (people.size > 0) sidebar.box.append(new SidebarSectionLabel(_("People")));
+            foreach (var d in people) add_device_row(d);
             if (others.size > 0) sidebar.box.append(new SidebarSectionLabel(_("Nearby")));
             foreach (var d in others) {
                 var row = new SidebarRow(d.icon_name, d.name);
