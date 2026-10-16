@@ -312,7 +312,7 @@ namespace Singularity.Apps.Nearby {
             icon.icon_name = Format.device_icon(d.device_type);
             name_label.label = d.name;
             if (!d.reachable) status_label.label = _("Not connected. Open KDE Connect on %s.").printf(d.name);
-            else if (d.address != "") status_label.label = _("Connected over Wi-Fi");
+            else if (d.address != "") status_label.label = _("Connected over the local network");
             else status_label.label = _("Connected");
             battery_box.visible = d.battery >= 0 && d.has_plugin("battery");
             if (battery_box.visible) {
