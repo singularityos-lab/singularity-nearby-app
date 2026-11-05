@@ -7,7 +7,7 @@ namespace Singularity.Apps.Nearby {
 
     public class SendDialogs : Object {
 
-        private static DropDown? device_picker(NearbyClient client, out string[] ids) {
+        private static ChoiceButton? device_picker(NearbyClient client, out string[] ids) {
             string[] names = {};
             string[] found = {};
             foreach (var d in client.usable_devices()) {
@@ -17,7 +17,7 @@ namespace Singularity.Apps.Nearby {
             }
             ids = found;
             if (found.length < 2) return null;
-            var drop = new DropDown.from_strings(names);
+            var drop = new ChoiceButton.from_strings(names);
             drop.hexpand = true;
             return drop;
         }
@@ -45,7 +45,7 @@ namespace Singularity.Apps.Nearby {
 
         public static void send_link(Gtk.Application app, NearbyClient client, string? device_id, string initial = "") {
             string[] ids = {};
-            DropDown? picker = null;
+            ChoiceButton? picker = null;
             if (device_id == null || device_id == "") {
                 picker = device_picker(client, out ids);
                 if (ids.length == 0) {
