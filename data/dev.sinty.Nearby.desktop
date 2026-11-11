@@ -11,6 +11,7 @@ StartupWMClass=dev.sinty.Nearby
 StartupNotify=true
 X-Singularity-App=dev.sinty.Nearby
 X-Singularity-Dock-Recent=true
+X-Sinty-Agent-Bus=dev.sinty.Nearby.App
 Actions=send-files;pair-device;received-files;
 
 [Desktop Action send-files]

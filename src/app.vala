@@ -111,6 +111,7 @@ namespace Singularity.Apps.Nearby {
             view.append(_("Toggle Sidebar"), "win.toggle-sidebar");
             menu.append_submenu(_("View"), view);
             set_menubar(menu);
+            NearbyIntents.install(this);
 
             var quit = new SimpleAction("quit", null);
             quit.activate.connect(() => {

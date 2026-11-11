@@ -38,6 +38,7 @@ executable('singularity-nearby-app',
     'src/window.vala',
     'src/search.vala',
     'src/app.vala',
+    'src/agent_intents.vala',
   ),
   dependencies: [gtk_dep, gee_dep, gio_dep, gio_unix_dep, libsingularity_dep],
   install: true
