@@ -100,6 +100,10 @@ namespace Singularity.Apps.Nearby {
         private ActionRow notifications_row;
         private SwitchRow clipboard_row;
         private SwitchRow always_row;
+        private PreferencesGroup screen_group;
+        private ActionRow show_here_row;
+        private ActionRow use_as_screen_row;
+        private Button show_here_btn;
         private PreferencesGroup sharing_group;
         private PreferencesGroup features_group;
         private Gee.HashMap<string, SwitchRow> feature_rows = new Gee.HashMap<string, SwitchRow>();
@@ -200,6 +204,25 @@ namespace Singularity.Apps.Nearby {
             notifications_row.activated.connect(() => open_notifications(device_id));
             phone_group.add_row(notifications_row);
             page.append(phone_group);
+
+            screen_group = new PreferencesGroup(_("Screen"));
+            show_here_row = new ActionRow("", "", "video-display-symbolic");
+            show_here_btn = new Button.with_label(_("Open"));
+            show_here_btn.valign = Align.CENTER;
+            show_here_btn.clicked.connect(() => {
+                var d = device;
+                if (d == null) return;
+                client.simple.begin(d.showing_desktop_of ? "StopDesktopOf" : "ShowDesktopOf", new Variant("(s)", device_id));
+            });
+            show_here_row.add_suffix(show_here_btn);
+            screen_group.add_row(show_here_row);
+            use_as_screen_row = new ActionRow("", "", "video-display-symbolic");
+            var use_btn = new Button.with_label(_("Share"));
+            use_btn.valign = Align.CENTER;
+            use_btn.clicked.connect(() => client.simple.begin("ShowDesktopOn", new Variant("(s)", device_id)));
+            use_as_screen_row.add_suffix(use_btn);
+            screen_group.add_row(use_as_screen_row);
+            page.append(screen_group);
 
             sharing_group = new PreferencesGroup(_("Sharing"));
             clipboard_row = new SwitchRow(_("Shared Clipboard"), _("Copy on one device, paste on the other"), false);
@@ -327,6 +350,18 @@ namespace Singularity.Apps.Nearby {
             ring_btn.sensitive = d.usable;
             drop_zone.visible = share;
             drop_zone.set_device_name(d.name);
+
+            show_here_row.visible = d.can_show_desktop_of || d.showing_desktop_of;
+            show_here_row.title = _("Show %s Here").printf(d.name);
+            show_here_row.subtitle = d.showing_desktop_of
+                ? _("Open in a window on this device")
+                : _("Opens its desktop in a window you control with this keyboard and pointer");
+            show_here_btn.label = d.showing_desktop_of ? _("Stop") : _("Open");
+            show_here_btn.sensitive = d.usable;
+            use_as_screen_row.visible = d.can_show_desktop_on;
+            use_as_screen_row.title = _("Use %s as a Screen").printf(d.name);
+            use_as_screen_row.subtitle = _("Shows this desktop on %s after it accepts").printf(d.name);
+            screen_group.visible = show_here_row.visible || use_as_screen_row.visible;
 
             phone_group.visible = (d.has_plugin("sms") && d.supports_sms) || d.has_plugin("notifications");
             messages_row.visible = d.has_plugin("sms") && d.supports_sms;
