@@ -211,6 +211,45 @@ namespace Singularity.Apps.Nearby {
             set_page("pairing");
         }
 
+        public Variant save_migration() {
+            string page = stack.visible_child_name ?? "welcome";
+            var d = new VariantDict();
+            d.insert_value("page", new Variant.string(page));
+            d.insert_value("selected", new Variant.string(selected));
+            d.insert_value("history", new Variant.strv(history.to_array()));
+            d.insert_value("sidebar", new Variant.boolean(get_sidebar_visible()));
+            if (page == "messages") d.insert_value("thread", messages_view.save_state());
+            return d.end();
+        }
+
+        public void restore_migration(Variant data) {
+            var d = new VariantDict(data);
+            string page = "welcome";
+            string id = "";
+            d.lookup("page", "s", out page);
+            d.lookup("selected", "s", out id);
+            switch (page) {
+                case "device": show_device(id, false); break;
+                case "messages":
+                case "notifications":
+                    show_device(id, false);
+                    open_page(page);
+                    break;
+                case "received": show_received(false); break;
+                case "pairing": show_pairing(id != "" ? id : null); break;
+            }
+            var thread = d.lookup_value("thread", new VariantType("(xsb)"));
+            if (thread != null && stack.visible_child_name == "messages") messages_view.restore_state(thread);
+            var saved = d.lookup_value("history", VariantType.STRING_ARRAY);
+            if (saved != null) {
+                history.clear();
+                foreach (unowned string key in saved.get_strv()) history.add(key);
+                update_bubbles();
+            }
+            bool sidebar;
+            if (d.lookup("sidebar", "b", out sidebar)) set_sidebar_visible(sidebar);
+        }
+
         public void open_page(string page) {
             if (pending_show != "" && (page == "messages" || page == "notifications")) {
                 pending_page = page;

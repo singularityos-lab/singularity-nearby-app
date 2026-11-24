@@ -140,6 +140,20 @@ namespace Singularity.Apps.Nearby {
             update_send();
         }
 
+        public Variant save_state() {
+            bool composing = thread_stack.visible_child_name == "thread" && to_box.visible;
+            return new Variant("(xsb)", thread, thread_address, composing);
+        }
+
+        public void restore_state(Variant state) {
+            int64 t;
+            string address;
+            bool composing;
+            state.get("(xsb)", out t, out address, out composing);
+            if (composing) new_message();
+            else if (t >= 0) open_thread(t, address);
+        }
+
         private void open_thread(int64 t, string address) {
             thread = t;
             thread_address = address;

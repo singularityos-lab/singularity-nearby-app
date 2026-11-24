@@ -15,7 +15,7 @@ namespace Singularity.Apps.Nearby {
         }
     }
 
-    public class NearbyApp : Singularity.Application {
+    public class NearbyApp : Singularity.Application, Singularity.Migration.Migratable {
         public const string UNIQUE_NAME = "dev.sinty.Nearby.App";
         public const string PRESENTER_PATH = "/dev/sinty/Nearby/App";
 
@@ -189,14 +189,43 @@ namespace Singularity.Apps.Nearby {
 
         private NearbyWindow ensure_window() {
             if (window == null) {
-                window = new NearbyWindow(this, client, transfers);
-                window.close_request.connect(() => {
-                    window = null;
-                    return false;
-                });
+                adopt(new NearbyWindow(this, client, transfers));
                 window.show_welcome();
             }
             return window;
+        }
+
+        private void adopt(NearbyWindow w) {
+            window = w;
+            w.close_request.connect(() => {
+                if (window == w) window = null;
+                return false;
+            });
+        }
+
+        public Variant save_model() {
+            return new VariantDict().end();
+        }
+
+        public async void restore_model(Variant model) throws Error {
+        }
+
+        public string window_kind(Gtk.Window w) {
+            return (w is NearbyWindow) ? "nearby" : "";
+        }
+
+        public Variant save_window(Gtk.Window w) {
+            return ((NearbyWindow) w).save_migration();
+        }
+
+        public async Gtk.Window? rebuild_window(string kind, Variant data) throws Error {
+            if (kind != "nearby") return null;
+            if (window != null) window.destroy();
+            var w = new NearbyWindow(this, client, transfers);
+            adopt(w);
+            w.show_welcome();
+            w.restore_migration(data);
+            return w;
         }
 
         private void publish_dock() {
